@@ -32,7 +32,8 @@ import {
   getStageSLAStatus,
   ENHANCED_STAGE_CONFIGS,
 } from "@/lib/workflow";
-import { emailTriggerService, getEmailLog, EmailLogEntry } from "@/lib/email";
+import { emailTriggerService, getEmailLog, EmailLogEntry, EmailTemplate } from "@/lib/email";
+import { EmailComposeModal, EmailSendData } from "@/components/admin/EmailComposeModal";
 import {
   ArrowLeft,
   MapPin,
@@ -69,9 +70,9 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailLog, setEmailLog] = useState<EmailLogEntry[]>([]);
   const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
 
   const projectId = params.id as string;
 
@@ -87,22 +88,20 @@ export default function ProjectDetailPage() {
     fetchProject();
   }, [projectId]);
 
-  const handleSendEmail = async (type: "stage-update" | "welcome" | "completed") => {
+  const handleSendEmail = async (emailData: EmailSendData) => {
     if (!project) return;
-    setIsSendingEmail(true);
     setEmailSuccess(null);
 
     try {
-      const result = await emailTriggerService.sendManualEmail(type, project);
+      const result = await emailTriggerService.sendManualEmail(emailData.template, project);
       if (result.success) {
-        setEmailSuccess(`${type} email sent successfully!`);
+        setEmailSuccess(`Email sent successfully!`);
         setEmailLog(getEmailLog(project.id));
       }
     } catch (error) {
       console.error("Failed to send email:", error);
     }
 
-    setIsSendingEmail(false);
     setTimeout(() => setEmailSuccess(null), 3000);
   };
 
@@ -642,14 +641,9 @@ export default function ProjectDetailPage() {
               <Button
                 className="w-full"
                 variant="default"
-                onClick={() => handleSendEmail("stage-update")}
-                disabled={isSendingEmail}
+                onClick={() => setShowEmailModal(true)}
               >
-                {isSendingEmail ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4 mr-2" />
-                )}
+                <Send className="w-4 h-4 mr-2" />
                 Send Status Update
               </Button>
               <Button
@@ -664,6 +658,14 @@ export default function ProjectDetailPage() {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Email Compose Modal */}
+          <EmailComposeModal
+            open={showEmailModal}
+            onOpenChange={setShowEmailModal}
+            project={project}
+            onSend={handleSendEmail}
+          />
 
           {/* Email History */}
           <Card>
