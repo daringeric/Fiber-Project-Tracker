@@ -4,48 +4,109 @@
 
 @layer base {
   :root {
+    /* ===========================================
+       LIGHTCURVE BRAND CSS VARIABLES
+       =========================================== */
+
+    /* Primary Colors */
+    --lc-navy: #0E0A49;
+    --lc-white: #FFFFFF;
+    --lc-charcoal: #1D1D1D;
+
+    /* Accent Colors */
+    --lc-wave: #00A2AD;
+    --lc-violetta: #BD137A;
+
+    /* Navy Scale */
+    --lc-navy-50: #E8E7EF;
+    --lc-navy-100: #C5C3D8;
+    --lc-navy-200: #9E9BBE;
+    --lc-navy-300: #7773A4;
+    --lc-navy-400: #595491;
+    --lc-navy-500: #3B357D;
+    --lc-navy-600: #352F71;
+    --lc-navy-700: #2D2762;
+    --lc-navy-800: #251F53;
+    --lc-navy-900: #0E0A49;
+    --lc-navy-950: #080630;
+
+    /* Wave Scale */
+    --lc-wave-50: #E6F7F8;
+    --lc-wave-100: #B3E8EB;
+    --lc-wave-500: #00A2AD;
+    --lc-wave-600: #00929C;
+    --lc-wave-700: #007F88;
+
+    /* Violetta Scale */
+    --lc-violetta-50: #FBE8F2;
+    --lc-violetta-100: #F4C6DE;
+    --lc-violetta-500: #BD137A;
+    --lc-violetta-600: #AA116E;
+    --lc-violetta-700: #930F5F;
+
+    /* ===========================================
+       SHADCN/UI THEME VARIABLES
+       =========================================== */
+
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 11%; /* Charcoal */
+
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 11%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 213 55% 24%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 193 100% 42%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 213 55% 24%;
+    --popover-foreground: 0 0% 11%;
+
+    --primary: 244 76% 16%; /* Navy 900 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 244 20% 92%; /* Navy 50 */
+    --secondary-foreground: 244 76% 16%;
+
+    --muted: 244 20% 92%;
+    --muted-foreground: 244 15% 55%;
+
+    --accent: 183 100% 34%; /* Wave */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 330 82% 41%; /* Violetta */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 244 20% 90%;
+    --input: 244 20% 90%;
+    --ring: 183 100% 34%; /* Wave */
+
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 193 100% 42%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 193 100% 42%;
+    --background: 244 76% 10%;
+    --foreground: 0 0% 100%;
+
+    --card: 244 76% 12%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 244 76% 12%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 183 100% 34%; /* Wave */
+    --primary-foreground: 244 76% 16%;
+
+    --secondary: 244 40% 20%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 244 40% 20%;
+    --muted-foreground: 244 15% 70%;
+
+    --accent: 330 82% 41%; /* Violetta */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 330 82% 35%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 244 40% 25%;
+    --input: 244 40% 25%;
+    --ring: 183 100% 34%;
   }
 }
 
@@ -62,93 +123,143 @@
 }
 
 @layer components {
-  /* Tracker Stage Indicators */
+  /* ===========================================
+     TRACKER STAGE INDICATORS
+     =========================================== */
+
   .stage-indicator {
     @apply relative flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300;
   }
 
   .stage-indicator--pending {
-    @apply border-gray-300 bg-gray-50 text-gray-400;
+    @apply border-navy-200 bg-navy-50 text-navy-300;
   }
 
   .stage-indicator--in-progress {
-    @apply border-accent-primary bg-accent-primary/10 text-accent-primary animate-pulse-glow;
+    @apply border-wave-500 bg-wave-50 text-wave-500 animate-pulse-glow;
   }
 
   .stage-indicator--completed {
-    @apply border-success-500 bg-success-500 text-white;
+    @apply border-wave-500 bg-wave-500 text-white;
   }
 
   .stage-indicator--blocked {
-    @apply border-error-500 bg-error-50 text-error-500;
+    @apply border-violetta-500 bg-violetta-50 text-violetta-500 animate-pulse-glow-violetta;
   }
 
-  /* Stage Connector Lines */
+  /* ===========================================
+     STAGE CONNECTOR LINES
+     =========================================== */
+
   .stage-connector {
     @apply h-1 flex-1 transition-all duration-500;
   }
 
   .stage-connector--pending {
-    @apply bg-gray-200;
+    @apply bg-navy-100;
   }
 
   .stage-connector--completed {
-    @apply bg-success-500;
+    @apply bg-wave-500;
   }
 
   .stage-connector--in-progress {
-    @apply bg-gradient-to-r from-success-500 to-gray-200;
+    @apply bg-gradient-to-r from-wave-500 to-navy-100;
   }
 
-  /* Card Styles */
+  /* ===========================================
+     CARD STYLES
+     =========================================== */
+
   .card-elevated {
-    @apply bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200;
+    @apply bg-white rounded-lg border border-navy-100 shadow-sm hover:shadow-md transition-shadow duration-200;
   }
 
-  /* Button Base */
+  .card-navy {
+    @apply bg-navy-900 text-white rounded-lg;
+  }
+
+  /* ===========================================
+     BUTTON STYLES
+     =========================================== */
+
   .btn {
-    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wave-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50;
   }
 
   .btn-primary {
-    @apply bg-navy-700 text-white hover:bg-navy-800;
+    @apply bg-wave-500 text-white hover:bg-wave-600;
   }
 
   .btn-secondary {
-    @apply bg-gray-100 text-gray-900 hover:bg-gray-200;
+    @apply bg-navy-50 text-navy-900 hover:bg-navy-100;
   }
 
-  .btn-accent {
-    @apply bg-accent-primary text-white hover:bg-accent-primary/90;
+  .btn-navy {
+    @apply bg-navy-900 text-white hover:bg-navy-800;
   }
 
-  /* Status Badges */
+  .btn-violetta {
+    @apply bg-violetta-500 text-white hover:bg-violetta-600;
+  }
+
+  .btn-outline {
+    @apply border-2 border-navy-900 text-navy-900 hover:bg-navy-50;
+  }
+
+  .btn-outline-white {
+    @apply border-2 border-white text-white hover:bg-white/10;
+  }
+
+  /* ===========================================
+     STATUS BADGES
+     =========================================== */
+
   .badge {
     @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
   }
 
   .badge-pending {
-    @apply bg-gray-100 text-gray-700;
+    @apply bg-navy-100 text-navy-700;
   }
 
   .badge-in-progress {
-    @apply bg-blue-100 text-blue-700;
+    @apply bg-wave-100 text-wave-700;
   }
 
   .badge-completed {
-    @apply bg-success-100 text-success-700;
+    @apply bg-wave-100 text-wave-700;
   }
 
   .badge-blocked {
-    @apply bg-error-100 text-error-700;
+    @apply bg-violetta-100 text-violetta-700;
+  }
+
+  /* ===========================================
+     GRADIENT BACKGROUNDS
+     =========================================== */
+
+  .bg-gradient-navy {
+    @apply bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950;
+  }
+
+  .bg-gradient-wave {
+    @apply bg-gradient-to-r from-wave-500 to-wave-600;
+  }
+
+  .bg-gradient-brand {
+    @apply bg-gradient-to-r from-navy-900 via-wave-500 to-violetta-500;
   }
 }
 
 @layer utilities {
-  /* Custom scrollbar */
+  /* ===========================================
+     CUSTOM SCROLLBAR
+     =========================================== */
+
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: theme('colors.gray.300') transparent;
+    scrollbar-color: theme('colors.navy.200') transparent;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
@@ -161,21 +272,47 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: theme('colors.gray.300');
+    background-color: theme('colors.navy.200');
     border-radius: 3px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: theme('colors.gray.400');
+    background-color: theme('colors.navy.300');
   }
 
-  /* Glass effect */
+  /* ===========================================
+     GLASS EFFECT
+     =========================================== */
+
   .glass {
     @apply bg-white/80 backdrop-blur-md;
   }
 
-  /* Text gradient */
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-navy-700 to-accent-primary;
+  .glass-navy {
+    @apply bg-navy-900/90 backdrop-blur-md;
+  }
+
+  /* ===========================================
+     TEXT GRADIENTS
+     =========================================== */
+
+  .text-gradient-brand {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-wave-500 to-violetta-500;
+  }
+
+  .text-gradient-navy {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-navy-700 to-navy-900;
+  }
+
+  /* ===========================================
+     GLOW EFFECTS
+     =========================================== */
+
+  .glow-wave {
+    box-shadow: 0 0 20px rgba(0, 162, 173, 0.3);
+  }
+
+  .glow-violetta {
+    box-shadow: 0 0 20px rgba(189, 19, 122, 0.3);
   }
 }

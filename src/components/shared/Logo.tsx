@@ -4,93 +4,110 @@ interface LogoProps {
   className?: string;
   variant?: "full" | "icon";
   theme?: "light" | "dark";
+  size?: "sm" | "md" | "lg";
 }
 
-export function Logo({ className, variant = "full", theme = "dark" }: LogoProps) {
-  const textColor = theme === "dark" ? "text-white" : "text-navy-700";
-  const accentColor = "text-accent-primary";
+export function Logo({
+  className,
+  variant = "full",
+  theme = "dark",
+  size = "md"
+}: LogoProps) {
+  // Lightcurve brand colors
+  const textColor = theme === "dark" ? "text-white" : "text-navy-900";
+  const waveColor = "#00A2AD"; // Wave
+  const violettaColor = "#BD137A"; // Violetta
+  const navyColor = theme === "dark" ? "#FFFFFF" : "#0E0A49";
+
+  const sizeClasses = {
+    sm: { icon: "w-8 h-8", text: "text-lg", subtext: "text-[10px]" },
+    md: { icon: "w-10 h-10", text: "text-xl", subtext: "text-xs" },
+    lg: { icon: "w-12 h-12", text: "text-2xl", subtext: "text-sm" },
+  };
+
+  const IconSVG = ({ iconClassName }: { iconClassName?: string }) => (
+    <svg
+      viewBox="0 0 40 40"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn(sizeClasses[size].icon, iconClassName)}
+    >
+      {/* Outer ring - Navy/White */}
+      <circle
+        cx="20"
+        cy="20"
+        r="18"
+        stroke={navyColor}
+        strokeWidth="2"
+        fill="none"
+      />
+
+      {/* Wave curve - representing the "light curve" */}
+      <path
+        d="M6 20C6 20 10 10 20 10C30 10 34 20 34 20"
+        stroke={waveColor}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        fill="none"
+      />
+
+      {/* Violetta accent curve */}
+      <path
+        d="M10 24C10 24 14 30 20 30C26 30 30 24 30 24"
+        stroke={violettaColor}
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+      />
+
+      {/* Center fiber point - Wave */}
+      <circle cx="20" cy="20" r="4" fill={waveColor} />
+      <circle cx="20" cy="20" r="2" fill="white" />
+
+      {/* Light rays emanating from center */}
+      <g opacity="0.6">
+        <path
+          d="M20 8V4"
+          stroke={waveColor}
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M28 12L31 9"
+          stroke={violettaColor}
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M12 12L9 9"
+          stroke={waveColor}
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+      </g>
+    </svg>
+  );
 
   if (variant === "icon") {
     return (
       <div className={cn("flex items-center justify-center", className)}>
-        <svg
-          width="40"
-          height="40"
-          viewBox="0 0 40 40"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full"
-        >
-          {/* Fiber optic representation */}
-          <circle
-            cx="20"
-            cy="20"
-            r="18"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={textColor}
-          />
-          <path
-            d="M12 20C12 20 16 12 20 12C24 12 28 20 28 20C28 20 24 28 20 28C16 28 12 20 12 20Z"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={accentColor}
-          />
-          <circle cx="20" cy="20" r="3" fill="currentColor" className={accentColor} />
-          {/* Light rays */}
-          <path
-            d="M20 8V4M20 36V32M32 20H36M4 20H8"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            className={accentColor}
-            opacity="0.5"
-          />
-        </svg>
+        <IconSVG />
       </div>
     );
   }
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <svg
-        width="40"
-        height="40"
-        viewBox="0 0 40 40"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Fiber optic representation */}
-        <circle
-          cx="20"
-          cy="20"
-          r="18"
-          stroke="currentColor"
-          strokeWidth="2"
-          className={textColor}
-        />
-        <path
-          d="M12 20C12 20 16 12 20 12C24 12 28 20 28 20C28 20 24 28 20 28C16 28 12 20 12 20Z"
-          stroke="currentColor"
-          strokeWidth="2"
-          className={accentColor}
-        />
-        <circle cx="20" cy="20" r="3" fill="currentColor" className={accentColor} />
-        {/* Light rays */}
-        <path
-          d="M20 8V4M20 36V32M32 20H36M4 20H8"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          className={accentColor}
-          opacity="0.5"
-        />
-      </svg>
+      <IconSVG />
       <div className="flex flex-col">
-        <span className={cn("text-xl font-bold tracking-tight", textColor)}>
-          Light<span className={accentColor}>Curve</span>
+        <span className={cn("font-bold tracking-tight", sizeClasses[size].text, textColor)}>
+          Light<span className="text-wave-500">curve</span>
         </span>
-        <span className={cn("text-xs tracking-wider uppercase opacity-70", textColor)}>
+        <span className={cn(
+          "tracking-wider uppercase",
+          sizeClasses[size].subtext,
+          theme === "dark" ? "text-white/70" : "text-navy-500"
+        )}>
           Fiber Tracker
         </span>
       </div>

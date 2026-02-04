@@ -3,21 +3,28 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-wave-500 focus:ring-offset-2",
   {
     variants: {
       variant: {
-        default: "border-transparent bg-navy-700 text-white",
-        secondary: "border-transparent bg-gray-100 text-gray-900",
-        destructive: "border-transparent bg-error-500 text-white",
-        outline: "text-foreground",
-        success: "border-transparent bg-success-100 text-success-700",
+        // Brand variants
+        default: "border-transparent bg-navy-900 text-white",
+        secondary: "border-transparent bg-navy-100 text-navy-900",
+        wave: "border-transparent bg-wave-500 text-white",
+        violetta: "border-transparent bg-violetta-500 text-white",
+        outline: "border-navy-200 text-navy-900",
+
+        // Semantic variants
+        success: "border-transparent bg-wave-100 text-wave-700",
         warning: "border-transparent bg-warning-100 text-warning-700",
-        info: "border-transparent bg-blue-100 text-blue-700",
-        pending: "border-transparent bg-gray-100 text-gray-600",
-        inProgress: "border-transparent bg-blue-100 text-blue-700",
-        completed: "border-transparent bg-success-100 text-success-700",
-        blocked: "border-transparent bg-error-100 text-error-700",
+        destructive: "border-transparent bg-violetta-500 text-white",
+        info: "border-transparent bg-wave-100 text-wave-700",
+
+        // Stage status variants (Lightcurve branded)
+        pending: "border-transparent bg-navy-100 text-navy-600",
+        inProgress: "border-transparent bg-wave-100 text-wave-700",
+        completed: "border-transparent bg-wave-100 text-wave-700",
+        blocked: "border-transparent bg-violetta-100 text-violetta-700",
       },
     },
     defaultVariants: {
