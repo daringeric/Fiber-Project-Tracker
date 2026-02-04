@@ -23,7 +23,16 @@ import {
   StageStatus,
   STAGE_CONFIGS,
   getOverallProgress,
+  getNextStage,
 } from "@/types";
+import {
+  canAdvanceStage,
+  getWeightedProgress,
+  getProgressBreakdown,
+  getStageSLAStatus,
+  ENHANCED_STAGE_CONFIGS,
+} from "@/lib/workflow";
+import { emailTriggerService, getEmailLog, EmailLogEntry } from "@/lib/email";
 import {
   ArrowLeft,
   MapPin,
@@ -40,6 +49,10 @@ import {
   Send,
   Clock,
   Save,
+  ChevronRight,
+  AlertCircle,
+  TrendingUp,
+  Timer,
 } from "lucide-react";
 
 const STAGE_ORDER: ProjectStage[] = [
@@ -56,6 +69,9 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailLog, setEmailLog] = useState<EmailLogEntry[]>([]);
+  const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
 
   const projectId = params.id as string;
 
@@ -63,10 +79,50 @@ export default function ProjectDetailPage() {
     const fetchProject = async () => {
       const data = await mockDataService.getProjectById(projectId);
       setProject(data);
+      if (data) {
+        setEmailLog(getEmailLog(data.id));
+      }
       setIsLoading(false);
     };
     fetchProject();
   }, [projectId]);
+
+  const handleSendEmail = async (type: "stage-update" | "welcome" | "completed") => {
+    if (!project) return;
+    setIsSendingEmail(true);
+    setEmailSuccess(null);
+
+    try {
+      const result = await emailTriggerService.sendManualEmail(type, project);
+      if (result.success) {
+        setEmailSuccess(`${type} email sent successfully!`);
+        setEmailLog(getEmailLog(project.id));
+      }
+    } catch (error) {
+      console.error("Failed to send email:", error);
+    }
+
+    setIsSendingEmail(false);
+    setTimeout(() => setEmailSuccess(null), 3000);
+  };
+
+  const handleAdvanceStage = async () => {
+    if (!project) return;
+    const nextStage = getNextStage(project.currentStage);
+    if (!nextStage) return;
+
+    setIsSaving(true);
+    // Complete current stage and start next
+    await mockDataService.updateStageStatus(project.id, project.currentStage, StageStatus.COMPLETED);
+    const updated = await mockDataService.updateStageStatus(project.id, nextStage, StageStatus.IN_PROGRESS);
+    if (updated) {
+      setProject(updated);
+      // Send stage update email
+      await emailTriggerService.onStageChanged(updated, nextStage);
+      setEmailLog(getEmailLog(updated.id));
+    }
+    setIsSaving(false);
+  };
 
   const handleTaskToggle = async (
     stage: ProjectStage,
@@ -160,6 +216,14 @@ export default function ProjectDetailPage() {
   }
 
   const overallProgress = getOverallProgress(project);
+  const weightedProgress = getWeightedProgress(project);
+  const progressBreakdown = getProgressBreakdown(project);
+  const validation = canAdvanceStage(project);
+  const nextStage = getNextStage(project.currentStage);
+  const currentSLA = getStageSLAStatus(
+    project.stages.find((s) => s.stage === project.currentStage)!,
+    project.currentStage
+  );
 
   return (
     <div className="space-y-6">
@@ -179,6 +243,12 @@ export default function ProjectDetailPage() {
               <Badge variant="secondary" className="gap-1">
                 <Loader2 className="w-3 h-3 animate-spin" />
                 Saving...
+              </Badge>
+            )}
+            {emailSuccess && (
+              <Badge variant="completed" className="gap-1">
+                <CheckCircle2 className="w-3 h-3" />
+                {emailSuccess}
               </Badge>
             )}
           </div>
@@ -201,22 +271,102 @@ export default function ProjectDetailPage() {
           {/* Overall Progress */}
           <Card>
             <CardHeader>
-              <CardTitle>Overall Progress</CardTitle>
-              <CardDescription>
-                Current stage: {STAGE_CONFIGS[project.currentStage].name}
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Overall Progress</CardTitle>
+                  <CardDescription>
+                    Current stage: {STAGE_CONFIGS[project.currentStage].name}
+                  </CardDescription>
+                </div>
+                {nextStage && (
+                  <Button
+                    onClick={handleAdvanceStage}
+                    disabled={!validation.canAdvance || isSaving}
+                    className="gap-2"
+                  >
+                    {isSaving ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    )}
+                    Advance to {STAGE_CONFIGS[nextStage].shortName}
+                  </Button>
+                )}
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              {/* Progress Bar */}
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Progress</span>
-                  <span className="font-bold text-navy-700">{overallProgress}%</span>
+                  <span className="text-gray-500">Weighted Progress</span>
+                  <span className="font-bold text-navy-700">{weightedProgress}%</span>
                 </div>
                 <Progress
-                  value={overallProgress}
+                  value={weightedProgress}
                   className="h-3"
-                  indicatorClassName="bg-gradient-to-r from-success-500 to-accent-primary"
+                  indicatorClassName="bg-gradient-to-r from-wave-500 to-violetta-500"
                 />
+              </div>
+
+              {/* Validation Status */}
+              {!validation.canAdvance && validation.errors.length > 0 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  <div className="flex items-center gap-2 text-amber-800 font-medium text-sm mb-2">
+                    <AlertCircle className="w-4 h-4" />
+                    Cannot advance stage
+                  </div>
+                  <ul className="text-sm text-amber-700 space-y-1">
+                    {validation.errors.map((error, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <span className="w-1 h-1 bg-amber-500 rounded-full" />
+                        {error.message}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* SLA Status */}
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Timer className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Stage Duration</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">
+                    {currentSLA.actualDays} / {currentSLA.targetDays} days
+                  </span>
+                  <Badge
+                    variant={
+                      currentSLA.status === "on_track"
+                        ? "completed"
+                        : currentSLA.status === "at_risk"
+                        ? "pending"
+                        : "blocked"
+                    }
+                  >
+                    {currentSLA.status.replace("_", " ")}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Stage Progress Summary */}
+              <div className="grid grid-cols-5 gap-2">
+                {progressBreakdown.stages.map((stage) => (
+                  <div
+                    key={stage.stage}
+                    className={cn(
+                      "text-center p-2 rounded-lg text-xs",
+                      stage.status === StageStatus.COMPLETED && "bg-wave-50 text-wave-700",
+                      stage.status === StageStatus.IN_PROGRESS && "bg-navy-50 text-navy-700 ring-2 ring-navy-200",
+                      stage.status === StageStatus.BLOCKED && "bg-violetta-50 text-violetta-700",
+                      stage.status === StageStatus.PENDING && "bg-gray-50 text-gray-500"
+                    )}
+                  >
+                    <div className="font-medium truncate">{STAGE_CONFIGS[stage.stage].shortName}</div>
+                    <div className="text-xs opacity-75">{stage.completion}%</div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -489,14 +639,84 @@ export default function ProjectDetailPage() {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button className="w-full" variant="default">
-                <Send className="w-4 h-4 mr-2" />
-                Send Status Update Email
+              <Button
+                className="w-full"
+                variant="default"
+                onClick={() => handleSendEmail("stage-update")}
+                disabled={isSendingEmail}
+              >
+                {isSendingEmail ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4 mr-2" />
+                )}
+                Send Status Update
               </Button>
-              <Button className="w-full" variant="outline">
-                <Mail className="w-4 h-4 mr-2" />
-                Contact Customer
+              <Button
+                className="w-full"
+                variant="outline"
+                asChild
+              >
+                <a href={`mailto:${project.customerEmail}`}>
+                  <Mail className="w-4 h-4 mr-2" />
+                  Contact Customer
+                </a>
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Email History */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Email History</CardTitle>
+              <CardDescription>
+                Recent notifications sent
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {emailLog.length > 0 ? (
+                <div className="space-y-3">
+                  {emailLog.slice(0, 5).map((email) => (
+                    <div
+                      key={email.id}
+                      className="flex items-start gap-3 text-sm"
+                    >
+                      <div
+                        className={cn(
+                          "w-2 h-2 rounded-full mt-1.5",
+                          email.status === "sent" && "bg-wave-500",
+                          email.status === "failed" && "bg-violetta-500",
+                          email.status === "pending" && "bg-amber-500"
+                        )}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium capitalize">
+                          {email.template.replace("-", " ")}
+                        </p>
+                        <p className="text-gray-500 text-xs">
+                          {formatDate(email.sentAt)}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={
+                          email.status === "sent"
+                            ? "completed"
+                            : email.status === "failed"
+                            ? "blocked"
+                            : "pending"
+                        }
+                        className="text-xs"
+                      >
+                        {email.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 text-center py-4">
+                  No emails sent yet
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
