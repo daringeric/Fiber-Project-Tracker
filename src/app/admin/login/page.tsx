@@ -35,15 +35,17 @@ function LoginForm() {
         email,
         password,
         redirect: false,
-        callbackUrl,
       });
 
       if (result?.error) {
         setAuthError("Invalid email or password");
         setIsLoading(false);
       } else if (result?.ok) {
-        router.push(callbackUrl);
-        router.refresh();
+        // Use window.location for a full page refresh to ensure session is loaded
+        window.location.href = callbackUrl;
+      } else {
+        setAuthError("Something went wrong. Please try again.");
+        setIsLoading(false);
       }
     } catch (error) {
       setAuthError("An error occurred. Please try again.");
