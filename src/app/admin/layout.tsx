@@ -3,9 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/shared/Logo";
 import { Button } from "@/components/ui/button";
+import { UserMenu } from "@/components/admin/UserMenu";
+import { getRoleLabel } from "@/lib/auth";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -13,7 +16,6 @@ import {
   Settings,
   Menu,
   X,
-  LogOut,
   Bell,
   ChevronDown,
 } from "lucide-react";
@@ -48,6 +50,20 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { data: session } = useSession();
+
+  // Don't apply admin layout to login page
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
+  const user = session?.user;
+  const userInitials = user?.name
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "??";
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -107,20 +123,24 @@ export default function AdminLayout({
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-navy-700">
-          <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 rounded-full bg-accent-primary flex items-center justify-center text-white font-semibold text-sm">
-              SM
+        {user && (
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-navy-700">
+            <div className="flex items-center gap-3 px-3 py-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-wave-500 to-violetta-500 flex items-center justify-center text-white font-semibold text-sm">
+                {userInitials}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">
+                  {user.name}
+                </p>
+                <p className="text-xs text-gray-400 truncate">
+                  {getRoleLabel(user.role)}
+                </p>
+              </div>
+              <ChevronDown className="w-4 h-4 text-gray-400" />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">
-                Sarah Mitchell
-              </p>
-              <p className="text-xs text-gray-400 truncate">Project Manager</p>
-            </div>
-            <ChevronDown className="w-4 h-4 text-gray-400" />
           </div>
-        </div>
+        )}
       </aside>
 
       {/* Main Content */}
@@ -147,9 +167,7 @@ export default function AdminLayout({
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error-500 rounded-full" />
             </Button>
-            <Button variant="ghost" size="icon">
-              <LogOut className="w-5 h-5" />
-            </Button>
+            <UserMenu />
           </div>
         </header>
 
