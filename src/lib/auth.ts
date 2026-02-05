@@ -4,7 +4,6 @@
 
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
 
 // ============================================
 // Types
@@ -28,13 +27,15 @@ export interface AuthUser {
 // Mock Users (for development)
 // ============================================
 
-// Pre-hashed passwords (bcrypt with 12 rounds)
-// admin123, pm123, viewer123
-const MOCK_USERS: (AuthUser & { passwordHash: string })[] = [
+interface MockUser extends AuthUser {
+  password: string;
+}
+
+const MOCK_USERS: MockUser[] = [
   {
     id: "user_admin",
     email: "admin@lightcurve.com",
-    passwordHash: "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X4.VTtYI9kKkK0K1G", // admin123
+    password: "admin123",
     name: "Admin User",
     role: UserRole.ADMIN,
     isActive: true,
@@ -42,7 +43,7 @@ const MOCK_USERS: (AuthUser & { passwordHash: string })[] = [
   {
     id: "user_pm",
     email: "pm@lightcurve.com",
-    passwordHash: "$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // pm123
+    password: "pm123",
     name: "Sarah Mitchell",
     role: UserRole.PROJECT_MANAGER,
     isActive: true,
@@ -50,7 +51,7 @@ const MOCK_USERS: (AuthUser & { passwordHash: string })[] = [
   {
     id: "user_viewer",
     email: "viewer@lightcurve.com",
-    passwordHash: "$2a$12$PXDzNH8v9euL.OZBWW1pAOc7gJk5w5a/qx5YV5j5Ym5YV5j5Ym5Y", // viewer123
+    password: "viewer123",
     name: "John Smith",
     role: UserRole.VIEWER,
     isActive: true,
@@ -62,6 +63,8 @@ const MOCK_USERS: (AuthUser & { passwordHash: string })[] = [
 // ============================================
 
 export const authOptions: NextAuthOptions = {
+  // Use environment variable or fallback for demo
+  secret: process.env.NEXTAUTH_SECRET || "lightcurve-fiber-tracker-demo-secret-2024",
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -70,34 +73,27 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        // Validate credentials exist
         if (!credentials?.email || !credentials?.password) {
           return null;
         }
 
-        // Find user by email
+        // Find user by email (case insensitive)
         const user = MOCK_USERS.find(
           (u) => u.email.toLowerCase() === credentials.email.toLowerCase()
         );
 
+        // Check user exists and is active
         if (!user || !user.isActive) {
           return null;
         }
 
-        // For demo purposes, accept these simple passwords
-        // In production, always use bcrypt.compare
-        const validPasswords: Record<string, string> = {
-          "admin@lightcurve.com": "admin123",
-          "pm@lightcurve.com": "pm123",
-          "viewer@lightcurve.com": "viewer123",
-        };
-
-        const isValidPassword =
-          validPasswords[user.email] === credentials.password;
-
-        if (!isValidPassword) {
+        // Verify password
+        if (user.password !== credentials.password) {
           return null;
         }
 
+        // Return user object (without password)
         return {
           id: user.id,
           email: user.email,
@@ -191,13 +187,13 @@ export function getRoleLabel(role: UserRole): string {
 // ============================================
 
 export function getMockUsers(): AuthUser[] {
-  return MOCK_USERS.map(({ passwordHash, ...user }) => user);
+  return MOCK_USERS.map(({ password, ...user }) => user);
 }
 
 export function getMockUserById(id: string): AuthUser | undefined {
   const user = MOCK_USERS.find((u) => u.id === id);
   if (user) {
-    const { passwordHash, ...userWithoutPassword } = user;
+    const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
   return undefined;
