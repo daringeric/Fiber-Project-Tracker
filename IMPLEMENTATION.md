@@ -29,10 +29,10 @@ Each phase has a dedicated document with detailed requirements, tasks, and verif
 | 2 | [Core Data Models](./docs/PHASE-2-DATA-MODELS.md) | ✅ Complete | TypeScript types, mock data service |
 | 3 | [Customer Tracker](./docs/PHASE-3-CUSTOMER-TRACKER.md) | ✅ Complete | Progress tracker, tracking page |
 | 4 | [Admin Portal](./docs/PHASE-4-ADMIN-PORTAL.md) | ✅ Complete | Dashboard, project management |
-| 5 | [Stage Management](./docs/PHASE-5-STAGE-MANAGEMENT.md) | ⬜ Pending | Workflow rules, enhanced tasks |
-| 6 | [Email Notifications](./docs/PHASE-6-EMAIL-NOTIFICATIONS.md) | ⬜ Pending | Email templates, triggers |
-| 7 | [Authentication](./docs/PHASE-7-AUTHENTICATION.md) | ⬜ Pending | Login, roles, permissions |
-| 8 | [Polish & Production](./docs/PHASE-8-POLISH-PRODUCTION.md) | ⬜ Pending | Testing, performance, docs |
+| 5 | [Stage Management](./docs/PHASE-5-STAGE-MANAGEMENT.md) | ✅ Complete | Workflow rules, enhanced tasks |
+| 6 | [Email Notifications](./docs/PHASE-6-EMAIL-NOTIFICATIONS.md) | ✅ Complete | Email templates, triggers |
+| 7 | [Authentication](./docs/PHASE-7-AUTHENTICATION.md) | ✅ Complete | Login, roles, permissions |
+| 8 | [Polish & Production](./docs/PHASE-8-POLISH-PRODUCTION.md) | ✅ Complete | Testing, performance, docs |
 | 9 | [Database Integration](./docs/PHASE-9-DATABASE-INTEGRATION.md) | ⬜ Future | PostgreSQL, Prisma, integrations |
 
 ---
@@ -92,13 +92,13 @@ npm run dev
 # Sample code: FBRX-2K9M-HTPW
 ```
 
-### Tier 2: Enhanced (Phases 5-6) ⬜ Pending
+### Tier 2: Enhanced (Phases 5-6) ✅ Complete
 Production-ready features for real-world use.
 - Advanced stage workflow with validation
 - Automated email notifications
 - Task management enhancements
 
-### Tier 3: Production (Phases 7-8) ⬜ Pending
+### Tier 3: Production (Phases 7-8) ✅ Complete
 Security and quality assurance.
 - User authentication and authorization
 - Role-based access control
@@ -169,9 +169,18 @@ Error:                  #ef4444
 | `/` | Customer home/lookup |
 | `/track/[code]` | Customer tracking page |
 | `/admin` | Admin dashboard |
+| `/admin/login` | Admin login page |
 | `/admin/projects` | Projects list |
 | `/admin/projects/[id]` | Project management |
 | `/admin/projects/new` | Create project |
+| `/api/health` | Health check endpoint |
+
+### Test Credentials (Development)
+| Email | Password | Role |
+|-------|----------|------|
+| admin@lightcurve.com | admin123 | Admin |
+| pm@lightcurve.com | pm123 | Project Manager |
+| viewer@lightcurve.com | viewer123 | Viewer |
 
 ---
 
